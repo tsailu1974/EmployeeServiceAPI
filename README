@@ -1,0 +1,3 @@
+for creatimg new service project - dotnet new webapi -n MyApiProject
+for running this project - dotnet running
+copy URL from terminal & paste in explorer and run it.
