@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using EmployeeService.Models;
+using EmployeeService.Services;
 
 namespace EmployeeService.Controllers
 {
@@ -7,51 +8,32 @@ namespace EmployeeService.Controllers
     [ApiController]
     public class EmployeesController : ControllerBase
     {
+        private readonly IEmployeeService _employeeService;
 
+        public EmployeesController(IEmployeeService employeeService)
+        {
+            _employeeService = employeeService;
+        }
         // GET: api/employees/5
         [HttpGet("{id}")] // Maps HTTP GET requests with an "id" parameter to this action
-        public IActionResult GetEmployeesByGroupId(int id)
+        public async Task<IActionResult> GetEmployeesByGroupId(int id)
         {
-            var employees = new List<Employee>
-            {
-                new Employee
-                {
-                    EmployeeId = 1,
-                    GroupId = 101, 
-                    FirstName = "Alice",
-                    LastName = "Brown",
-                    DateOfBirth = new DateTime(1990, 5, 20),
-                    Gender = "F",
-                    MaritalStatus = "Single",
-                    EmploymentType = "Fulltime",
-                    Email = "alice.brown@example.com",
-                    HireDate = new DateTime(2021, 1, 15),
-                    TerminationDate = null
-                },
-                new Employee
-                {
-                    EmployeeId = 2,
-                    GroupId = 102,
-                    FirstName = "Bob",
-                    LastName = "Green",
-                    DateOfBirth = new DateTime(1988, 11, 2),
-                    Gender = "M",
-                    MaritalStatus = "Married",
-                    EmploymentType = "Contract",
-                    Email = "bob.green@example.com",
-                    HireDate = new DateTime(2022, 9, 10),
-                    TerminationDate = new DateTime(2024, 4, 1)
-                }
-            };
+            var employees = await _employeeService.GetEmployeesByGroupIdAsync(id); // Calls the service to get employees by group ID
 
-            var employeesById = employees.FirstOrDefault(e => e.GroupId == id);
+            return employees == null || !employees.Any() ? NotFound() : Ok(employees); // Returns 404 if no employees found, otherwise returns 200 with the employee list
+        }
 
-            if (employeesById == null)
-            {
-                return NotFound(); // Returns a 404 status code if the employee is not found
-            }
+        public async Task<IActionResult> GetEmployeeById(int id)
+        {
+            var employee = await _employeeService.GetEmployeeByIdAsync(id); // Calls the service to get an employee by ID
 
-            return Ok(employeesById);
+            return employee == null ? NotFound() : Ok(employee); // Returns 404 if no employee found, otherwise returns 200 with the employee details
+        }
+        public async Task<IActionResult> GetAllEmployees()
+        {
+            var employees = await _employeeService.GetAllEmployeesAsync(); // Calls the service to get all employees
+
+            return employees == null || !employees.Any() ? NotFound() : Ok(employees); // Returns 404 if no employees found, otherwise returns 200 with the employee list
         }
     }
 }

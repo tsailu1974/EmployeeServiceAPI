@@ -1,3 +1,6 @@
-for creatimg new service project - dotnet new webapi -n MyApiProject
-for running this project - dotnet running
-copy URL from terminal & paste in explorer and run it.
+Copy the URL from the repository (https://github.com/tsailu1974/EmployeeService.git) and clone in VS Code
+To create a new service project in VS Code - "dotnet new webapi -n MyApiProject"
+To run this project, use "dotnet run" command
+Copy URL (http://localhost:5280/api/Employees/101) & paste in explorer and run it.
+Copy same URL in postman (http://localhost:5280/api/Employees/101) and set method as GET and click on SEND
+Copy http://localhost:5280/swagger/index.html and execute GET method
