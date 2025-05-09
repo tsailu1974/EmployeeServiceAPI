@@ -1,5 +1,6 @@
 using EmployeeService.Models;
 using EmployeeService.Repositories;
+using EmployeeService.DTO;
 
 namespace EmployeeService.Services
 {
@@ -17,14 +18,18 @@ namespace EmployeeService.Services
             return await _employeeRepository.GetEmployeeByIdAsync(id);
         }
 
-        public async Task<IEnumerable<Employee>> GetEmployeesByGroupIdAsync(int id)
+        public async Task<IEnumerable<EmployeeDto>> GetEmployeesByGroupIdAsync(int id)
         {
-            return await _employeeRepository.GetEmployeesByGroupIdAsync(id);
-        }
+            var employees = await _employeeRepository.GetEmployeesByGroupIdAsync(id);
 
-        public async Task<IEnumerable<Employee>> GetAllEmployeesAsync()
-        {
-            return await _employeeRepository.GetAllEmployeesAsync();
+            return employees.Select(static e => new EmployeeDto {
+                    EmployeeID = e.EmployeeID,
+                    FirstName = e.FirstName!,
+                    LastName = e.LastName!,
+                    Email = e.Email!,
+                    EmploymentType = e.EmploymentType!.EmploymentType1!
+            });
         }
+      
     }
 }

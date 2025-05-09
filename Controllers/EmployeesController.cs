@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using EmployeeService.Models;
 using EmployeeService.Services;
+using Microsoft.AspNetCore.Authorization;
 
 namespace EmployeeService.Controllers
 {
@@ -14,6 +15,7 @@ namespace EmployeeService.Controllers
         {
             _employeeService = employeeService;
         }
+        [Authorize]
         // GET: api/employees/5
         [HttpGet("group/{id}")] // Maps HTTP GET requests with an "id" parameter to this action
         public async Task<IActionResult> GetEmployeesByGroupId(int id)
@@ -30,12 +32,6 @@ namespace EmployeeService.Controllers
 
             return employee == null ? NotFound() : Ok(employee); // Returns 404 if no employee found, otherwise returns 200 with the employee details
         }
-        [HttpGet()]
-        public async Task<IActionResult> GetAllEmployees()
-        {
-            var employees = await _employeeService.GetAllEmployeesAsync(); // Calls the service to get all employees
-
-            return employees == null || !employees.Any() ? NotFound() : Ok(employees); // Returns 404 if no employees found, otherwise returns 200 with the employee list
-        }
+       
     }
 }
