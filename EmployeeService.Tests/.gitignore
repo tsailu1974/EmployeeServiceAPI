@@ -1,5 +1,10 @@
 /obj
 /bin
+# VS workspace cache
+**/.vs/
+/.vs
+# User-specific project settings
+*.csproj.user
 # Visual Studio cache, temp and IntelliSense files
 .vs/
 *.user
