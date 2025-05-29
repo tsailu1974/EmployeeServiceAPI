@@ -6,24 +6,55 @@ using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Azure.Identity;
 
 
 var builder = WebApplication.CreateBuilder(args);
-var conn = builder.Configuration.GetConnectionString("EnterpriseConnection");
+
 var config = builder.Configuration;
+config.SetBasePath(Directory.GetCurrentDirectory())
+    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true)
+    .AddEnvironmentVariables();
 
+if (builder.Environment.IsProduction())
+{
+    var keyVaultUrl = builder.Configuration["keyVaultUrl"] ?? "https://bmas-app-keyvault.vault.azure.net/";
+    builder.Configuration.AddAzureKeyVault(
+       new Uri(keyVaultUrl),
+       new DefaultAzureCredential());
+}
 
-builder.Services.AddDbContext<AppDbContext>(opts => opts.UseSqlServer(conn));
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("EnterpriseConnection"),
+
+    sqlServerOptionsAction: sqloptions =>
+    {
+        sqloptions.EnableRetryOnFailure(
+            maxRetryCount: 5,
+            maxRetryDelay: TimeSpan.FromSeconds(30),
+            errorNumbersToAdd: null
+            );
+    }));
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowReactApp", policy =>
-    {
-        policy.WithOrigins("http://localhost:3000") // React app URL
-              .AllowAnyHeader()
-              .AllowAnyMethod();
-    });
-        
+    options.AddPolicy("AllowReactApp",
+        builder =>
+        {
+            var allowedOrigins = new List<string>();
+            //production URL
+            allowedOrigins.Add("https://employeeserviceapi-e4e0hpagapcmf4ay.centralus-01.azurewebsites.net");
+            if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+            {
+                allowedOrigins.Add("http://localhost:3000");
+            }
+
+            builder.WithOrigins(allowedOrigins.ToArray())
+                   .AllowAnyHeader()
+                   .AllowAnyMethod()
+                   .AllowCredentials();
+        });
 });
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -58,8 +89,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
-//app.UseHttpsRedirection();
+else 
+    app.UseHttpsRedirection();
 
 app.UseCors("AllowReactApp");
 app.UseAuthentication();   // must come before UseAuthorization
