@@ -24,7 +24,7 @@ if (builder.Environment.IsProduction())
        new Uri(keyVaultUrl),
        new DefaultAzureCredential());
 }
-
+builder.Services.AddControllers();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("EnterpriseConnection"),
 
