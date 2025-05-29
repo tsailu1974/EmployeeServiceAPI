@@ -44,7 +44,7 @@ builder.Services.AddCors(options =>
         {
             var allowedOrigins = new List<string>();
             //production URL
-            allowedOrigins.Add("https://employeeserviceapi-e4e0hpagapcmf4ay.centralus-01.azurewebsites.net");
+            allowedOrigins.Add("https://zealous-flower-0a09e880f.6.azurestaticapps.net");
             if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
             {
                 allowedOrigins.Add("http://localhost:3000");
